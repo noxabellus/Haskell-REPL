@@ -1,20 +1,23 @@
 import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
-	let configuration = vscode.workspace.getConfiguration("haskell-repl");
+	function configuration<T>(name: string, def: T) {
+		return vscode.workspace.getConfiguration("haskell-repl").get(name, def)
+	}
+	
 	console.log('haskell-repl plugin started');
 
 	context.subscriptions.push(vscode.commands.registerCommand('haskell-repl.startRepl', () => {
-		getTerm(configuration.get("replTerminalName", "")).then((t) => {
+		getTerm(configuration("replTerminalName", "")).then((t) => {
 			console.log("start");
 			vscode.window.showInformationMessage("Found running REPL terminal");
 			console.log("Haskell REPL terminal is already running"); 
 		}, () => {
 			console.log("Making new REPL terminal");
-			let term = vscode.window.createTerminal(configuration.get("replTerminalName", ""));
+			let term = vscode.window.createTerminal(configuration("replTerminalName", ""));
 
-			term.sendText(configuration.get("shellSetup", ""));
-			term.sendText(configuration.get("replCommand", ""));
+			term.sendText(configuration("shellSetup", ""));
+			term.sendText(configuration("replCommand", ""));
 		});
 	}));
 	
@@ -24,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('haskell-repl.killRepl', () => {
-		getTerm(configuration.get("replTerminalName", "")).then((t) => {
+		getTerm(configuration("replTerminalName", "")).then((t) => {
 			t.dispose();
 		}, () => {
 			vscode.window.showInformationMessage("Haskell REPL is not running");
@@ -34,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('haskell-repl.sendCommand', () => {
 		vscode.window.showInputBox().then((s) => {
 			if(s === undefined) {return;}
-			getTerm(configuration.get("replTerminalName", "")).then((t) => {
+			getTerm(configuration("replTerminalName", "")).then((t) => {
 				t.sendText(s);
 			}, () => {
 				vscode.window.showInformationMessage("Haskell REPL is not running");
@@ -43,10 +46,11 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	
 	vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
-		if (document.languageId === configuration.get("fileType", "") 
+		let cfg = configuration("fileType", ["haskell"]);
+		if (cfg.includes(document.languageId)
 			&& document.uri.scheme === "file") {
-			getTerm(configuration.get("replTerminalName", "")).then((t) => {
-				t.sendText(configuration.get("replReload", ""));
+			getTerm(configuration("replTerminalName", "")).then((t) => {
+				t.sendText(configuration("replReload", ""));
 			});
 		}
 	});

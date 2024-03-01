@@ -45,27 +45,27 @@
 			"properties": {
 				"haskell-repl.replCommand": {
 					"type": "string",
-					"default": "cabal repl",
+					"default": "stack repl",
 					"description": "Command to run REPL"
 				},
 				"haskell-repl.replReload": {
 					"type": "string",
-					"default": ":! clear\r:reload",
+					"default": ":reload",
 					"description": "Command to reload REPL"
 				},
 				"haskell-repl.replTerminalName": {
 					"type": "string",
-					"default": "cabal",
+					"default": "stack",
 					"description": "Name for REPL Terminal"
 				},
 				"haskell-repl.shellSetup": {
 					"type": "string",
-					"default": "nix-shell",
+					"default": "echo \"starting repl\"",
 					"description": "Command to setup environment"
 				},
 				"haskell-repl.fileType": {
-					"type": "string",
-					"default": "haskell",
+					"type": "array",
+					"default": "[\"haskell\"]",
 					"description": "File Type to trigger on"
 				}
 			}
